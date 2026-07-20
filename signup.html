@@ -28,15 +28,17 @@
                     <label>Company Name</label>
                     <input type="text" id="company" class="form-control" placeholder="Tech Corp LLC" required>
                 </div>
-                <div class="form-group password-input">
+                <div class="form-group">
                     <label>Password</label>
-                    <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                    <div class="password-wrapper" id="passwordWrapper">
+                        <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                    </div>
                 </div>
-                <div class="form-group password-input">
+                <div class="form-group">
                     <label>Confirm Password</label>
                     <input type="password" id="confirmPassword" class="form-control" placeholder="••••••••" required>
-                    <small id="passwordError" class="error-text">Passwords do not match</small>
                 </div>
+                <small id="passwordError" class="error-text"></small>
                 
                 <button type="submit" class="btn-primary">Sign Up</button>
             </form>

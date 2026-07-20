@@ -8,14 +8,14 @@ function changePassword(event) {
   const newPassword = document.getElementById("newPassword").value;
   const confirmNewPassword = document.getElementById("confirmNewPassword").value;
 
-  const currentUserEmail = sessionStorage.getItem("currentUserEmail");
+  const currentUserEmail = sessionStorage.getItem("crm_session");
 
   if (!currentUserEmail) {
     alert("please log in first");
     return;
   }
 
-  const users = localStorage.getItem("users");
+  const users = localStorage.getItem("crm_users");
   const parsedUsers = JSON.parse(users);
 
   if (!parsedUsers) {
@@ -45,7 +45,7 @@ function changePassword(event) {
 
   // 4. შევცვალოთ პაროლი და შევინახოთ
   currentUser.password = newPassword;
-  localStorage.setItem("users", JSON.stringify(parsedUsers));
+  localStorage.setItem("crm_users", JSON.stringify(parsedUsers));
   
   alert("password changed successfully");
   

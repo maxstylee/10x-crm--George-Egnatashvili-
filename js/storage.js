@@ -1,6 +1,6 @@
 // 1. თემის მომენტალური ჩატვირთვა (გვერდის გათეთრების თავიდან ასაცილებლად)
 (function initTheme() {
-  const savedTheme = localStorage.getItem("theme") || "dark";
+  const savedTheme = localStorage.getItem("crm_theme") || "dark";
   document.documentElement.setAttribute("data-theme", savedTheme);
 })();
 
@@ -18,7 +18,7 @@ function initThemeSelector() {
 // 3. თემის შეცვლა მომხმარებლის მიერ მენიუდან არჩევისას
 function changeTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
-  localStorage.setItem("theme", theme);
+  localStorage.setItem("crm_theme", theme);
 }
 
 // ივენთის მიბმა გვერდის ჩატვირთვაზე

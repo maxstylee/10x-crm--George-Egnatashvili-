@@ -497,3 +497,49 @@ th {
   margin: 0;
   padding-top: 15px;
 }
+
+.password-wrapper {
+  position: relative;
+}
+
+.form-control.input-weak {
+  border-color: #e74c3c;
+  transition: border-color 0.3s ease;
+}
+
+.form-control.input-medium {
+  border-color: #e67e22;
+  transition: border-color 0.3s ease;
+}
+
+.form-control.input-strong {
+  border-color: #27ae60;
+  transition: border-color 0.3s ease;
+}
+
+.error-text {
+  display: block;
+  visibility: hidden;
+  font-size: 0.8rem;
+  font-weight: 500;
+  min-height: 1.2em;
+  margin-top: 4px;
+  margin-bottom: 2px;
+  transition: color 0.3s ease;
+}
+
+.error-text.visible {
+  visibility: visible;
+}
+
+.error-text.error-weak {
+  color: #e74c3c;
+}
+
+.error-text.error-medium {
+  color: #e67e22;
+}
+
+.error-text.error-strong {
+  color: #27ae60;
+}

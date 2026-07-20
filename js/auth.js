@@ -1,6 +1,6 @@
 // Helper function to get all registered users from localStorage
 function getUsers() {
-  const users = localStorage.getItem("users");
+  const users = localStorage.getItem("crm_users");
   return users ? JSON.parse(users) : [];
 }
 
@@ -8,7 +8,7 @@ function getUsers() {
 function saveUser(user) {
   const users = getUsers();
   users.push(user);
-  localStorage.setItem("users", JSON.stringify(users));
+  localStorage.setItem("crm_users", JSON.stringify(users));
 }
 
 // Main function to handle user registration
@@ -45,31 +45,92 @@ document.addEventListener("DOMContentLoaded", () => {
     const confirmPasswordInput = document.getElementById("confirmPassword");
     const passwordError = document.getElementById("passwordError");
 
+
+    // --- REAL-TIME PASSWORD VALIDATION ---
+    function validatePasswordsRealtime() {
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+
+      // ველი ცარიელია — გადავამზადოთ ყველაფერი
+      if (!password) {
+        passwordError.classList.remove("visible", "error-weak", "error-medium", "error-strong");
+        passwordInput.classList.remove("input-weak", "input-medium", "input-strong");
+        return true;
+      }
+
+      // ეტაპი 1: სიგრძის შემოწმება
+      if (password.length < 8) {
+        showError("Password must be at least 8 characters long.", "weak");
+        setStrength(1);
+        return false;
+      }
+
+      // ეტაპი 2: დიდი ასოს შემოწმება
+      if (!/[A-Z]/.test(password)) {
+        showError("Password must contain at least one uppercase letter.", "medium");
+        setStrength(2);
+        return false;
+      }
+
+      // ეტაპი 3: ციფრის შემოწმება
+      if (!/[0-9]/.test(password)) {
+        showError("Password must contain at least one number.", "medium");
+        setStrength(2);
+        return false;
+      }
+
+      // ძლიერი პაროლი — შევამოწმოთ confirm
+      setStrength(3);
+
+      if (confirmPassword && password !== confirmPassword) {
+        showError("Passwords do not match!", "weak");
+        return false;
+      }
+
+      // ყველაფერი კარგია
+      showError("Strong password! ✓", "strong");
+      return true;
+    }
+
+    function showError(message, level) {
+      passwordError.textContent = message;
+      // visibility ცვლის display-ის მაგივრად — layout არ ძვრება
+      passwordError.classList.add("visible");
+      passwordError.classList.remove("error-weak", "error-medium", "error-strong");
+      passwordError.classList.add("error-" + level);
+    }
+
+    function setStrength(level) {
+      // border ფერი პირდაპირ input-ზე
+      passwordInput.classList.remove("input-weak", "input-medium", "input-strong");
+      if (level === 1) passwordInput.classList.add("input-weak");
+      if (level === 2) passwordInput.classList.add("input-medium");
+      if (level === 3) passwordInput.classList.add("input-strong");
+    }
+
+    // მოვუსმინოთ კრეფის პროცესს რეალურ დროში
+    passwordInput.addEventListener("input", validatePasswordsRealtime);
+    confirmPasswordInput.addEventListener("input", validatePasswordsRealtime);
+
+    // --- SUBMIT EVENT ---
     signupForm.addEventListener("submit", (event) => {
-      // Prevent the default form submit reload behavior
       event.preventDefault();
 
-      // Retrieve form field values
       const name = document.getElementById("fullName").value.trim();
       const email = document.getElementById("email").value.trim();
       const company = document.getElementById("company").value.trim();
       const password = passwordInput.value;
-      const confirmPassword = confirmPasswordInput.value;
 
-      // Step 1: Validate passwords match
-      if (password !== confirmPassword) {
-        passwordError.style.display = "block";
+      // საბოლოო შემოწმება გაგზავნამდე
+      if (!validatePasswordsRealtime()) {
         return;
-      } else {
-        passwordError.style.display = "none";
       }
 
-      // Step 2: Attempt registration
+      // Attempt registration
       const isRegistered = registerUser(name, email, company, password);
 
       if (isRegistered) {
         alert("Registration successful! Redirecting to Sign In page.");
-        // Redirect to login page
         setTimeout(() => {
           window.location.href = "index.html";
         }, 1500);
@@ -78,6 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// Sign In Logic
 const signinForm = document.getElementById("form-signin");
 if (signinForm) {
   signinForm.addEventListener("submit", (e) => {
@@ -85,26 +147,22 @@ if (signinForm) {
 
     const correctEmail = document.getElementById("signinEmail").value;
     const correctPassword = document.getElementById("signinPassword").value;
-    const user = localStorage.getItem("users");
+    const users = getUsers(); // გამოვიყენოთ უკვე შექმნილი ფუნქცია
 
-    if (!user) {
+    if (users.length === 0) {
       alert("მომხმარებლები არ მოიძებნა!");
       return;
     }
 
-    const parsedUser = JSON.parse(user);
-
-    const foundUser = parsedUser.find((item) => {
+    const foundUser = users.find((item) => {
       return item.email === correctEmail && item.password === correctPassword;
     });
 
     if (foundUser) {
-      sessionStorage.setItem("currentUserEmail", correctEmail);
+      sessionStorage.setItem("crm_session", correctEmail);
       window.location.href = "dashboard.html";
     } else {
-      alert("invalid email or password");
+      alert("Invalid email or password");
     }
   });
 }
-
-

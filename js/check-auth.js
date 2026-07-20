@@ -1,5 +1,5 @@
 (function () {
-  const currentUser = sessionStorage.getItem("currentUserEmail");
+  const currentUser = sessionStorage.getItem("crm_session");
   // თუ მომხმარებელი არ არის შესული, გადავიყვანოთ ავტორიზაციის გვერდზე
   if (!currentUser) {
     alert("please log in first");
@@ -8,6 +8,6 @@
 })();
 
 function logout() {
-  sessionStorage.removeItem("currentUserEmail");
+  sessionStorage.removeItem("crm_session");
   window.location.href = "index.html";
 }
