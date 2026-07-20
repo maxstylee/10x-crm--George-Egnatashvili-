@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10X CRM - Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/check-auth.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div>
+                <div class="logo-text">10X CRM</div>
+                <nav class="sidebar-nav">
+                    <a href="dashboard.html" class="nav-link active">📊 Dashboard</a>
+                    <a href="clients.html" class="nav-link">👥 Clients</a>
+                    <a href="profile.html" class="nav-link">👤 Profile</a>
+                </nav>
+            </div>
+            <div class="sidebar-bottom">
+                <div>
+                    <a href="settings.html" class="settings-btn">⚙️ Settings</a>
+                </div>
+                <div>
+                    <a href="index.html" class="logout-btn" onclick="logout()">🚪 Logout</a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h2>Dashboard</h2>
+                <div id="current-time" class="clock-display">00:00:00</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Total Clients</div>
+                    <div class="stat-value">124</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Active Clients</div>
+                    <div class="stat-value">86</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Won Revenue</div>
+                    <div class="stat-value">$45,200</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">New This Week</div>
+                    <div class="stat-value">+12</div>
+                </div>
+            </div>
+
+            <h3 class="section-title">Pipeline Overview</h3>
+            <div class="pipeline-grid">
+                <div class="pipeline-card border-lead">
+                    <p class="stat-title">Lead</p>
+                    <p class="stat-value">24</p>
+                </div>
+                <div class="pipeline-card border-contacted">
+                    <p class="stat-title">Contacted</p>
+                    <p class="stat-value">18</p>
+                </div>
+                <div class="pipeline-card border-won">
+                    <p class="stat-title">Won</p>
+                    <p class="stat-value">52</p>
+                </div>
+                <div class="pipeline-card border-lost">
+                    <p class="stat-title">Lost</p>
+                    <p class="stat-value">10</p>
+                </div>
+            </div>
+
+            <h3 class="section-title">Recent Clients</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Company</th>
+                            <th>Deal Value</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Alex Johnson</td>
+                            <td>Tech Group</td>
+                            <td>$1,200</td>
+                            <td><span class="badge badge-won">won</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <script src="js/storage.js"></script>
+</body>
+
+</html>

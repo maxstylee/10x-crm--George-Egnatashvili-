@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10X CRM - Clients</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/check-auth.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div>
+                <div class="logo-text">10X CRM</div>
+                <nav class="sidebar-nav">
+                    <a href="dashboard.html" class="nav-link">📊 Dashboard</a>
+                    <a href="clients.html" class="nav-link active">👥 Clients</a>
+                    <a href="profile.html" class="nav-link">👤 Profile</a>
+                </nav>
+            </div>
+            <div class="sidebar-bottom">
+                <div>
+                    <a href="settings.html" class="settings-btn">⚙️ Settings</a>
+                </div>
+                <div>
+                    <a href="index.html" class="logout-btn" onclick="logout()">🚪 Logout</a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h2>Clients</h2>
+                <button class="btn-primary btn-auto-width">+ Add Client</button>
+            </div>
+
+            <div class="controls-bar">
+                <input type="text" class="form-control search-input" placeholder="Search...">
+                <select class="form-control filter-select">
+                    <option value="all">All Statuses</option>
+                    <option value="lead">Lead</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="won">Won</option>
+                    <option value="lost">Lost</option>
+                </select>
+                <select class="form-control filter-select">
+                    <option value="newest">Newest First</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Company</th>
+                            <th>Deal Value</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>George Miller</td>
+                            <td>george@innovate.com</td>
+                            <td>+1 555 0192</td>
+                            <td>Innovate LLC</td>
+                            <td>$5,000</td>
+                            <td><span class="badge badge-lead">lead</span></td>
+                            <td>
+                                <button class="action-btn action-edit">✏️</button>
+                                <button class="action-btn action-delete">🗑️</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal" id="addClientModal">
+        <div class="modal-content">
+            <h3 class="section-title">Add New Client</h3>
+            <form>
+                <div class="form-group"><label>Name</label><input type="text" class="form-control" required></div>
+                <div class="form-group"><label>Email</label><input type="email" class="form-control" required></div>
+                <div class="form-group"><label>Phone</label><input type="text" class="form-control" required></div>
+                <div class="form-group"><label>Company</label><input type="text" class="form-control" required></div>
+                <div class="form-group"><label>Deal Value ($)</label><input type="number" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select class="form-control">
+                        <option value="lead">Lead</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="won">Won</option>
+                        <option value="lost">Lost</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Add Client</button>
+            </form>
+        </div>
+    </div>
+    <!-- <script src="js/auth.js"></script> -->
+    <script src="js/storage.js"></script>
+</body>
+
+</html>
