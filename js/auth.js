@@ -35,6 +35,7 @@ function registerUser(name, email, company, password) {
   saveUser(newUser);
   return true;
 }
+console.log(1+1)
 
 // DOM Setup and Submission logic
 document.addEventListener("DOMContentLoaded", () => {

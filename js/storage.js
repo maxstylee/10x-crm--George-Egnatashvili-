@@ -21,5 +21,32 @@ function changeTheme(theme) {
   localStorage.setItem("crm_theme", theme);
 }
 
+// 4. ლაივ საათის ფუნქცია (საიდბარში და ჰედერში)
+function startLiveClock() {
+  function update() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    const timeString = `${hours}:${minutes}:${seconds}`;
+
+    const sidebarClock = document.getElementById("sidebarClock");
+    if (sidebarClock) {
+      sidebarClock.textContent = timeString;
+    }
+
+    const currentTimeHeader = document.getElementById("current-time");
+    if (currentTimeHeader) {
+      currentTimeHeader.textContent = timeString;
+    }
+  }
+
+  update();
+  setInterval(update, 1000);
+}
+
 // ივენთის მიბმა გვერდის ჩატვირთვაზე
-window.addEventListener("DOMContentLoaded", initThemeSelector);
+window.addEventListener("DOMContentLoaded", function () {
+  initThemeSelector();
+  startLiveClock();
+});

@@ -6,11 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>10X CRM - Clients</title>
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/check-auth.js"></script>
+    <script src="js/guard.js"></script>
+    <script src="js/storage.js"></script>
 </head>
 
 <body>
     <div class="app-container">
+
+        <!-- Sidebar -->
         <aside class="sidebar">
             <div>
                 <div class="logo-text">10X CRM</div>
@@ -19,6 +22,10 @@
                     <a href="clients.html" class="nav-link active">👥 Clients</a>
                     <a href="profile.html" class="nav-link">👤 Profile</a>
                 </nav>
+            </div>
+            <div class="sidebar-clock">
+                <span class="clock-label">⏰ Live Time</span>
+                <span id="sidebarClock" class="clock-time">00:00:00</span>
             </div>
             <div class="sidebar-bottom">
                 <div>
@@ -30,71 +37,87 @@
             </div>
         </aside>
 
+        <!-- Main -->
         <main class="main-content">
+
+            <!-- Page Header -->
             <div class="page-header">
                 <h2>Clients</h2>
-                <button class="btn-primary btn-auto-width">+ Add Client</button>
+                <button class="btn-primary btn-auto-width" onclick="openAddClientModal()">+ Add Client</button>
             </div>
 
-            <div class="controls-bar">
-                <input type="text" class="form-control search-input" placeholder="Search...">
-                <select class="form-control filter-select">
-                    <option value="all">All Statuses</option>
-                    <option value="lead">Lead</option>
-                    <option value="contacted">Contacted</option>
-                    <option value="won">Won</option>
-                    <option value="lost">Lost</option>
-                </select>
-                <select class="form-control filter-select">
+            <!-- Toolbar: Search + Filter Chips + Sort -->
+            <div class="clients-toolbar">
+                <div class="toolbar-left">
+
+                    <!-- Search -->
+                    <div class="search-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="searchInput" class="form-control search-input" placeholder="Search...">
+                    </div>
+
+                    <!-- Filter Chips -->
+                    <div class="filter-chips">
+                        <button class="chip chip-active">All</button>
+                        <button class="chip">Lead</button>
+                        <button class="chip">Contacted</button>
+                        <button class="chip">Won</button>
+                        <button class="chip">Lost</button>
+                    </div>
+
+
+                </div>
+
+                <!-- Sort -->
+                <select class="form-control sort-select">
                     <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="name_asc">Name A–Z</option>
+                    <option value="deal_desc">Deal ↓</option>
                 </select>
             </div>
 
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Company</th>
-                            <th>Deal Value</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>George Miller</td>
-                            <td>george@innovate.com</td>
-                            <td>+1 555 0192</td>
-                            <td>Innovate LLC</td>
-                            <td>$5,000</td>
-                            <td><span class="badge badge-lead">lead</span></td>
-                            <td>
-                                <button class="action-btn action-edit">✏️</button>
-                                <button class="action-btn action-delete">🗑️</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <!-- Clients Zone — JS fills this -->
+            <div id="clientsZone"></div>
+
         </main>
     </div>
 
+    <!-- Modal -->
     <div class="modal" id="addClientModal">
         <div class="modal-content">
-            <h3 class="section-title">Add New Client</h3>
-            <form>
-                <div class="form-group"><label>Name</label><input type="text" class="form-control" required></div>
-                <div class="form-group"><label>Email</label><input type="email" class="form-control" required></div>
-                <div class="form-group"><label>Phone</label><input type="text" class="form-control" required></div>
-                <div class="form-group"><label>Company</label><input type="text" class="form-control" required></div>
-                <div class="form-group"><label>Deal Value ($)</label><input type="number" class="form-control" required>
+            <div class="modal-header">
+                <h3 class="section-title">Add New Client</h3>
+                <button type="button" class="modal-close-btn" onclick="closeAddClientModal()">✖</button>
+            </div>
+            <form id="addClientForm" onsubmit="handleAddClient(event)">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="newFirstName" class="form-control" required placeholder="John">
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="newLastName" class="form-control" required placeholder="Doe">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="newEmail" class="form-control" required placeholder="john@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="newPhone" class="form-control" required placeholder="+1 234 567 890">
+                </div>
+                <div class="form-group">
+                    <label>Company</label>
+                    <input type="text" id="newCompany" class="form-control" required placeholder="Acme Corp">
+                </div>
+                <div class="form-group">
+                    <label>Deal Value ($)</label>
+                    <input type="number" id="newDealValue" class="form-control" required placeholder="1500">
                 </div>
                 <div class="form-group">
                     <label>Status</label>
-                    <select class="form-control">
+                    <select id="newStatus" class="form-control">
                         <option value="lead">Lead</option>
                         <option value="contacted">Contacted</option>
                         <option value="won">Won</option>
@@ -105,8 +128,46 @@
             </form>
         </div>
     </div>
-    <!-- <script src="js/auth.js"></script> -->
-    <script src="js/storage.js"></script>
+
+    <!-- Modal info for client details -->
+    <div class="modal" id="clientInfoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="section-title" id="modal-name">Client Info</h3>
+                <button class="modal-close-btn" onclick="closeClientModal()">✖</button>
+            </div>
+            <div class="client-details">
+                <div class="detail-row highlight-row">
+                    <span class="detail-label">📞 Phone:</span>
+                    <span class="detail-value phone-highlight" id="modal-phone"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">📧 Email:</span>
+                    <span class="detail-value" id="modal-email"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">🏢 Company:</span>
+                    <span class="detail-value" id="modal-company"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">💰 Deal Value:</span>
+                    <span class="detail-value" id="modal-deal"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">📌 Status:</span>
+                    <select id="modal-status" class="form-control status-select"
+                        onchange="changeModalClientStatus(this.value)">
+                        <option class="badge-lead" value="lead">lead</option>
+                        <option class="badge-contacted" value="contacted">contacted</option>
+                        <option class="badge-won" value="won">won</option>
+                        <option class="badge-lost" value="lost">lost</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/clients.js"></script>
 </body>
 
 </html>
