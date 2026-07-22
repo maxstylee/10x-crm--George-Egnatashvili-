@@ -26,9 +26,6 @@
             </div>
             <div class="sidebar-bottom">
                 <div>
-                    <a href="settings.html" class="settings-btn">⚙️ Settings</a>
-                </div>
-                <div>
                     <a href="index.html" class="logout-btn" onclick="logout()">🚪 Logout</a>
                 </div>
             </div>
@@ -36,35 +33,103 @@
 
         <main class="main-content">
             <div class="page-header">
-                <h2>Profile Settings</h2>
+                <h2>User Profile & Settings</h2>
             </div>
 
             <div class="profile-grid">
+                <!-- 1. Account Information -->
                 <div class="stat-card profile-info">
-                    <h3 class="section-title">Account Information</h3>
+                    <div class="table-header-container">
+                        <h3 class="section-title">Account Information</h3>
+                        <button type="button" class="btn-primary btn-auto-width" onclick="openEditProfileModal()">Edit Profile</button>
+                    </div>
                     <div class="form-group">
                         <label>Full Name</label>
-                        <input type="text" class="form-control" value="David Smith" readonly>
+                        <input type="text" id="profileName" class="form-control" readonly>
                     </div>
                     <div class="form-group">
                         <label>Email Address</label>
-                        <input type="email" class="form-control" value="david@company.com" readonly>
+                        <input type="email" id="profileEmail" class="form-control" readonly>
                     </div>
                     <div class="form-group">
                         <label>Company</label>
-                        <input type="text" class="form-control" value="10X Digital" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>Created At</label>
-                        <input type="text" class="form-control" value="2026-01-15" readonly>
+                        <input type="text" id="profileCompany" class="form-control" readonly>
                     </div>
                 </div>
 
-                
+                <!-- 2. Theme Settings -->
+                <div class="stat-card">
+                    <h3 class="section-title">Theme Settings</h3>
+                    <div class="form-group">
+                        <label>Select Site Theme</label>
+                        <select class="form-control" id="themeSelect" onchange="changeTheme(this.value)">
+                            <option value="dark">Dark Mode</option>
+                            <option value="light">Light Mode</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 3. Change Password -->
+                <div class="stat-card">
+                    <h3 class="section-title">Change Password</h3>
+                    <form id="changePasswordForm" onsubmit="changePassword(event)">
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <input type="password" id="currentPassword" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" id="newPassword" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" id="confirmNewPassword" class="form-control" required>
+                        </div>
+                        <small id="profilePasswordError" class="error-text"></small>
+                        <button type="submit" class="btn-primary">Update Password</button>
+                    </form>
+                </div>
             </div>
         </main>
     </div>
+
+    <!-- Modal for editing profile details -->
+    <div class="modal" id="editProfileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="section-title">Edit Profile Information</h3>
+                <button type="button" class="modal-close-btn" onclick="closeEditProfileModal()">✖</button>
+            </div>
+            <form id="editProfileForm" onsubmit="saveProfileEdits(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="editProfileName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Company Name</label>
+                    <input type="text" id="editProfileCompany" class="form-control" required>
+                </div>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Alert Modal (Alert-ის ნაცვლად) -->
+    <div class="modal" id="appAlertModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="section-title" id="alertModalTitle">Notification</h3>
+                <button type="button" class="modal-close-btn" onclick="closeAlertModal()">✖</button>
+            </div>
+            <p class="modal-message" id="alertModalMessage"></p>
+            <div class="modal-actions">
+                <button type="button" class="btn-primary btn-auto-width" onclick="closeAlertModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/storage.js"></script>
+    <script src="js/profile.js"></script>
 </body>
 
 </html>

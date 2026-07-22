@@ -29,9 +29,6 @@
             </div>
             <div class="sidebar-bottom">
                 <div>
-                    <a href="settings.html" class="settings-btn">⚙️ Settings</a>
-                </div>
-                <div>
                     <a href="index.html" class="logout-btn" onclick="logout()">🚪 Logout</a>
                 </div>
             </div>
@@ -58,13 +55,12 @@
 
                     <!-- Filter Chips -->
                     <div class="filter-chips">
-                        <button class="chip chip-active">All</button>
-                        <button class="chip">Lead</button>
-                        <button class="chip">Contacted</button>
-                        <button class="chip">Won</button>
-                        <button class="chip">Lost</button>
+                        <button name="all" class="chip chip-active">All</button>
+                        <button name="lead" class="chip">Lead</button>
+                        <button name="contacted" class="chip">Contacted</button>
+                        <button name="won" class="chip">Won</button>
+                        <button name="lost" class="chip">Lost</button>
                     </div>
-
 
                 </div>
 
@@ -83,7 +79,7 @@
         </main>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal for adding new client -->
     <div class="modal" id="addClientModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -129,40 +125,77 @@
         </div>
     </div>
 
-    <!-- Modal info for client details -->
+    <!-- Modal for editing client details on double-click -->
     <div class="modal" id="clientInfoModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="section-title" id="modal-name">Client Info</h3>
-                <button class="modal-close-btn" onclick="closeClientModal()">✖</button>
+                <h3 class="section-title">Edit Client Details</h3>
+                <button type="button" class="modal-close-btn" onclick="closeClientModal()">✖</button>
             </div>
-            <div class="client-details">
-                <div class="detail-row highlight-row">
-                    <span class="detail-label">📞 Phone:</span>
-                    <span class="detail-value phone-highlight" id="modal-phone"></span>
+            <form id="editClientForm" onsubmit="saveClientEdits(event)">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="editFirstName" class="form-control" required>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">📧 Email:</span>
-                    <span class="detail-value" id="modal-email"></span>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="editLastName" class="form-control" required>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">🏢 Company:</span>
-                    <span class="detail-value" id="modal-company"></span>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="editEmail" class="form-control" required>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">💰 Deal Value:</span>
-                    <span class="detail-value" id="modal-deal"></span>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="editPhone" class="form-control" required>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">📌 Status:</span>
-                    <select id="modal-status" class="form-control status-select"
-                        onchange="changeModalClientStatus(this.value)">
-                        <option class="badge-lead" value="lead">lead</option>
-                        <option class="badge-contacted" value="contacted">contacted</option>
-                        <option class="badge-won" value="won">won</option>
-                        <option class="badge-lost" value="lost">lost</option>
+                <div class="form-group">
+                    <label>Company</label>
+                    <input type="text" id="editCompany" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Deal Value ($)</label>
+                    <input type="number" id="editDealValue" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="editStatus" class="form-control">
+                        <option value="lead">Lead</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="won">Won</option>
+                        <option value="lost">Lost</option>
                     </select>
                 </div>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Alert Modal (alert()-ის ნაცვლად) -->
+    <div class="modal" id="appAlertModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="section-title" id="alertModalTitle">Notification</h3>
+                <button type="button" class="modal-close-btn" onclick="closeAlertModal()">✖</button>
+            </div>
+            <p class="modal-message" id="alertModalMessage"></p>
+            <div class="modal-actions">
+                <button type="button" class="btn-primary btn-auto-width" onclick="closeAlertModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal (confirm()-ის ნაცვლად) -->
+    <div class="modal" id="appConfirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="section-title">Confirmation</h3>
+                <button type="button" class="modal-close-btn" onclick="closeConfirmModal(false)">✖</button>
+            </div>
+            <p class="modal-message" id="confirmModalMessage">Are you sure?</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeConfirmModal(false)">Cancel</button>
+                <button type="button" class="btn-danger" onclick="closeConfirmModal(true)">Delete</button>
             </div>
         </div>
     </div>

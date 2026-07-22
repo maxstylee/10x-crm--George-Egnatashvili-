@@ -26,9 +26,6 @@
             </div>
             <div class="sidebar-bottom">
                 <div>
-                    <a href="settings.html" class="settings-btn">⚙️ Settings</a>
-                </div>
-                <div>
                     <a href="index.html" class="logout-btn" onclick="logout()">🚪 Logout</a>
                 </div>
             </div>
@@ -43,39 +40,39 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-title">Total Clients</div>
-                    <div class="stat-value">124</div>
+                    <div id="total-clients" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Active Clients</div>
-                    <div class="stat-value">86</div>
+                    <div id="total-activeClients" class="stat-value">0</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Won Revenue</div>
-                    <div class="stat-value">$45,200</div>
+                    <div id="total-netRevenue" class="stat-value">$0</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">New This Week</div>
-                    <div class="stat-value">+12</div>
+                    <div id="total-newThisWeek" class="stat-value">0</div>
                 </div>
             </div>
 
             <h3 class="section-title">Pipeline Overview</h3>
             <div class="pipeline-grid">
-                <div class="pipeline-card border-lead">
+                <div class="pipeline-card border-lead" onclick="filterClients('lead')">
                     <p class="stat-title">Lead</p>
-                    <p class="stat-value">24</p>
+                    <p class="stat-value" id="count-lead">0</p>
                 </div>
-                <div class="pipeline-card border-contacted">
+                <div class="pipeline-card border-contacted" onclick="filterClients('contacted')">
                     <p class="stat-title">Contacted</p>
-                    <p class="stat-value">18</p>
+                    <p class="stat-value" id="count-contacted">0</p>
                 </div>
-                <div class="pipeline-card border-won">
+                <div class="pipeline-card border-won" onclick="filterClients('won')">
                     <p class="stat-title">Won</p>
-                    <p class="stat-value">52</p>
+                    <p class="stat-value" id="count-won">0</p>
                 </div>
-                <div class="pipeline-card border-lost">
+                <div class="pipeline-card border-lost" onclick="filterClients('lost')">
                     <p class="stat-title">Lost</p>
-                    <p class="stat-value">10</p>
+                    <p class="stat-value" id="count-lost">0</p>
                 </div>
             </div>
 
@@ -90,19 +87,17 @@
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>Alex Johnson</td>
-                            <td>Tech Group</td>
-                            <td>$1,200</td>
-                            <td><span class="badge badge-won">won</span></td>
-                        </tr>
+                    <tbody id="recent-clients">
                     </tbody>
                 </table>
+            </div>
+            <div class="see-more-container">
+                <a href="clients.html" class="see-more-link">See more &gt;</a>
             </div>
         </main>
     </div>
     <script src="js/storage.js"></script>
+    <script src="js/dashboard.js"></script>
 </body>
 
 </html>

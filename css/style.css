@@ -377,6 +377,7 @@ body {
   border: 1px solid var(--border-color);
   padding: 16px;
   border-radius: 8px;
+  cursor: pointer;
 }
 
 .border-lead {
@@ -396,7 +397,26 @@ body {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  overflow: hidden;
+  max-height: 690px;
+  overflow-y: auto;
+}
+
+.see-more-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.see-more-link {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.see-more-link:hover {
+  text-decoration: underline;
 }
 
 table {
@@ -416,6 +436,9 @@ th {
   color: var(--text-secondary);
   font-weight: 500;
   background-color: var(--input-bg);
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .badge {
@@ -479,9 +502,6 @@ th {
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 32px;
 }
-.profile-info {
-  width: 582px;
-}
 
 /* Modal */
 .modal {
@@ -503,6 +523,48 @@ th {
   border-radius: 8px;
   width: 100%;
   max-width: 500px;
+}
+
+.btn-secondary {
+  padding: 10px 18px;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background-color: var(--border-color);
+}
+
+.btn-danger {
+  padding: 10px 18px;
+  background-color: var(--status-lost);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  opacity: 0.9;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.modal-message {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.5;
 }
 .Setting-page {
   width: 582px;

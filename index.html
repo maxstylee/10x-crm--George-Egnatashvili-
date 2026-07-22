@@ -32,6 +32,21 @@
             </div>
         </div>
     </div>
+
+    <!-- Custom Alert Modal -->
+    <div class="modal" id="appAlertModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="section-title" id="alertModalTitle">Notification</h3>
+                <button type="button" class="modal-close-btn" onclick="closeAlertModal()">✖</button>
+            </div>
+            <p class="modal-message" id="alertModalMessage"></p>
+            <div class="modal-actions">
+                <button type="button" class="btn-primary btn-auto-width" onclick="closeAlertModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/storage.js"></script>
     <script src="js/auth.js"></script>
 </body>
