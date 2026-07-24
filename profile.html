@@ -13,7 +13,7 @@
     <div class="app-container">
         <aside class="sidebar">
             <div>
-                <div class="logo-text">10X CRM</div>
+                <a href="dashboard.html" class="logo-text">10X CRM</a>
                 <nav class="sidebar-nav">
                     <a href="dashboard.html" class="nav-link">📊 Dashboard</a>
                     <a href="clients.html" class="nav-link">👥 Clients</a>
@@ -25,6 +25,15 @@
                 <span id="sidebarClock" class="clock-time">00:00:00</span>
             </div>
             <div class="sidebar-bottom">
+                <div class="sidebar-theme-wrapper">
+                    <div class="theme-switch-container">
+                        <span class="theme-switch-label" id="sidebarThemeLabel">🌙 Theme</span>
+                        <label class="theme-switch">
+                            <input type="checkbox" id="sidebarThemeToggle" onchange="toggleThemeSlider(this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
                 <div>
                     <a href="index.html" class="logout-btn" onclick="logout()">🚪 Logout</a>
                 </div>
@@ -41,7 +50,6 @@
                 <div class="stat-card profile-info">
                     <div class="table-header-container">
                         <h3 class="section-title">Account Information</h3>
-                        <button type="button" class="btn-primary btn-auto-width" onclick="openEditProfileModal()">Edit Profile</button>
                     </div>
                     <div class="form-group">
                         <label>Full Name</label>
@@ -52,8 +60,15 @@
                         <input type="email" id="profileEmail" class="form-control" readonly>
                     </div>
                     <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" id="profilePhone" class="form-control" readonly placeholder="Not provided">
+                    </div>
+                    <div class="form-group">
                         <label>Company</label>
                         <input type="text" id="profileCompany" class="form-control" readonly>
+                    </div>
+                    <div class="profile-actions-bottom">
+                        <button type="button" class="btn-primary btn-auto-width" onclick="openEditProfileModal()">Edit Profile</button>
                     </div>
                 </div>
 
@@ -104,6 +119,10 @@
                 <div class="form-group">
                     <label>Full Name</label>
                     <input type="text" id="editProfileName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" id="editProfilePhone" class="form-control" placeholder="+995 599 00 00 00">
                 </div>
                 <div class="form-group">
                     <label>Company Name</label>

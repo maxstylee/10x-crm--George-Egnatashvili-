@@ -1,92 +1,116 @@
 // ── 1. მოდალის დამხმარე ფუნქციები alert-ის ჩასანაცვლებლად
 function showAlertModal(message, title, onOk) {
-  var modal = document.getElementById("appAlertModal");
-  var msgEl = document.getElementById("alertModalMessage");
-  var titleEl = document.getElementById("alertModalTitle");
+  const modal = document.getElementById("appAlertModal");
+  const msgEl = document.getElementById("alertModalMessage");
+  const titleEl = document.getElementById("alertModalTitle");
 
   if (titleEl) titleEl.textContent = title || "შეტყობინება";
-  if (msgEl) msgEl.textContent = message;
+  if (msgEl) msgEl.innerHTML = message;
   if (modal) modal.style.display = "flex";
 
   window.currentAlertOkCallback = onOk;
 }
 
 function closeAlertModal() {
-  var modal = document.getElementById("appAlertModal");
+  const modal = document.getElementById("appAlertModal");
   if (modal) modal.style.display = "none";
   if (typeof window.currentAlertOkCallback === "function") {
-    window.currentAlertOkCallback();
+    const callback = window.currentAlertOkCallback;
     window.currentAlertOkCallback = null;
+    callback();
   }
 }
 
 // ── 2. LocalStorage-ში მომხმარებლების წაკითხვა და შენახვა
 function getUsers() {
-  var usersData = localStorage.getItem("crm_users");
+  const usersData = localStorage.getItem("crm_users");
   return usersData ? JSON.parse(usersData) : [];
 }
 
 function saveUser(newUser) {
-  var users = getUsers();
+  const users = getUsers();
   users.push(newUser);
   localStorage.setItem("crm_users", JSON.stringify(users));
 }
 
-// ── 3. რეგისტრაციის ლოგიკა
-function registerUser(name, email, company, password) {
-  var users = getUsers();
-
-  for (var i = 0; i < users.length; i++) {
-    if (users[i].email === email) {
-      showAlertModal("ამ ელ-ფოსტით ანგარიში უკვე არსებობს!");
-      return false;
-    }
-  }
-
-  var newUser = {
-    name: name,
-    email: email,
-    company: company,
-    password: password,
-    createdAt: new Date().toISOString()
-  };
-
-  saveUser(newUser);
-  return true;
-}
-
-// ── 4. გვერდის ჩატვირთვა და ფორმების მართვა
+// ── 3. გვერდის ჩატვირთვა და ფორმების მართვა
 document.addEventListener("DOMContentLoaded", function () {
-  var signupForm = document.getElementById("signupForm");
-  var signinForm = document.getElementById("form-signin");
+  const signupForm = document.getElementById("signupForm");
+  const signinForm = document.getElementById("form-signin");
 
-  // Sign Up ფორმა
+  // Sign Up ფორმა — ყველა ველის ერთდროული ვალიდაცია
   if (signupForm) {
     signupForm.addEventListener("submit", function (event) {
       event.preventDefault();
 
-      var name = document.getElementById("fullName").value.trim();
-      var email = document.getElementById("email").value.trim();
-      var company = document.getElementById("company").value.trim();
-      var password = document.getElementById("password").value;
-      var confirmPassword = document.getElementById("confirmPassword").value;
+      const name = document.getElementById("fullName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const company = document.getElementById("company").value.trim();
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
 
-      if (password.length < 6) {
-        showAlertModal("პაროლი უნდა იყოს სულ მცირე 6 სიმბოლო!");
-        return;
+      // შეცდომების შეგროვება მასივში (ყველა ვალიდაცია ერთდროულად)
+      const errors = [];
+
+      // 1. სრული სახელი — არანაკლებ 3 ასო
+      if (!name || name.length < 3) {
+        errors.push("სრული სახელი უნდა შეიცავდეს არანაკლებ 3 ასოს.");
       }
 
+      // 2. ელ-ფოსტის შემოწმება
+      if (!email || !email.includes("@")) {
+        errors.push("გთხოვთ მიუთითოთ ვალიდური ელ-ფოსტის მისამართი.");
+      } else {
+        // უკვე არსებული ელ-ფოსტის შემოწმება
+        const users = getUsers();
+        for (let i = 0; i < users.length; i++) {
+          if (users[i].email === email) {
+            errors.push("ამ ელ-ფოსტით ანგარიში უკვე არსებობს.");
+            break;
+          }
+        }
+      }
+
+      // 3. კომპანიის სახელი
+      if (!company) {
+        errors.push("გთხოვთ მიუთითოთ კომპანიის სახელი.");
+      }
+
+      // 4. პაროლის სიგრძე — მინიმუმ 8 სიმბოლო
+      if (!password || password.length < 8) {
+        errors.push("პაროლი უნდა იყოს სულ მცირე 8 სიმბოლო.");
+      }
+
+      // 5. პაროლების თანხვედრა
       if (password !== confirmPassword) {
-        showAlertModal("პაროლები ერთმანეთს არ ემთხვევა!");
+        errors.push("პაროლები ერთმანეთს არ ემთხვევა.");
+      }
+
+      // თუ აღმოჩნდა შეცდომები — ვაჩვენებთ ყველა შეცდომას ერთდროულად
+      if (errors.length > 0) {
+        const errorListHtml = errors.map(err => `• ${err}`).join("<br>");
+        showAlertModal(errorListHtml, "შეცდომა რეგისტრაციისას");
         return;
       }
 
-      var success = registerUser(name, email, company, password);
-      if (success) {
-        showAlertModal("რეგისტრაცია წარმატებით დასრულდა!", "წარმატება", function () {
-          window.location.href = "index.html";
-        });
-      }
+      // თუ შეცდომა არ არის — ვინახავთ მომხმარებელს
+      const newUser = {
+        name: name,
+        email: email,
+        company: company,
+        password: password,
+        createdAt: new Date().toISOString()
+      };
+
+      saveUser(newUser);
+
+      // წარმატებული რეგისტრაციის შეტყობინება და 1.5 წამიანი დაყოვნება index.html-ზე გადასვლამდე
+      showAlertModal("რეგისტრაცია წარმატებით დასრულდა! გადადიხართ ავტორიზაციის გვერდზე...", "წარმატება");
+      
+      setTimeout(function () {
+        closeAlertModal();
+        window.location.href = "index.html";
+      }, 1500);
     });
   }
 
@@ -95,27 +119,12 @@ document.addEventListener("DOMContentLoaded", function () {
     signinForm.addEventListener("submit", function (event) {
       event.preventDefault();
 
-      var email = document.getElementById("signinEmail").value.trim();
-      var password = document.getElementById("signinPassword").value;
-      var users = getUsers();
+      const email = document.getElementById("signinEmail").value.trim();
+      const password = document.getElementById("signinPassword").value;
+      const users = getUsers();
 
-      if (users.length === 0) {
-        // თუ პირველად შედის და მომხმარებლები არ არიან, შევქმნათ default დემო მომხმარებელი
-        var defaultUser = {
-          name: "Demo User",
-          email: email,
-          company: "CRM Corp",
-          password: password,
-          createdAt: new Date().toISOString()
-        };
-        saveUser(defaultUser);
-        sessionStorage.setItem("crm_session", email);
-        window.location.href = "dashboard.html";
-        return;
-      }
-
-      var foundUser = null;
-      for (var i = 0; i < users.length; i++) {
+      let foundUser = null;
+      for (let i = 0; i < users.length; i++) {
         if (users[i].email === email && users[i].password === password) {
           foundUser = users[i];
           break;
@@ -129,5 +138,13 @@ document.addEventListener("DOMContentLoaded", function () {
         showAlertModal("არასწორი ელ-ფოსტა ან პაროლი!");
       }
     });
+  }
+});
+
+// მოდალების დახურვა ბექგრაუნდზე (overlay) დაკლიკებისას
+window.addEventListener("click", function (event) {
+  const alertModal = document.getElementById("appAlertModal");
+  if (event.target === alertModal) {
+    closeAlertModal();
   }
 });

@@ -4,24 +4,42 @@
   document.documentElement.setAttribute("data-theme", savedTheme);
 })();
 
-// 2. ჩამოსაშლელ მენიუში სწორი მნიშვნელობის მინიჭება, როცა HTML ჩაიტვირთება
-function initThemeSelector() {
+// 2. თემის ელემენტების (სელექტორი და სლაიდერი) სინქრონიზაცია ჩატვირთვისას
+function initThemeControls() {
   const currentTheme = document.documentElement.getAttribute("data-theme");
   const selector = document.getElementById("themeSelect");
-  
-  // უსაფრთხოებისთვის ვამოწმებთ, საერთოდ არსებობს თუ არა ეს მენიუ გვერდზე
+  const sliderToggle = document.getElementById("sidebarThemeToggle");
+  const label = document.getElementById("sidebarThemeLabel");
+
   if (selector) {
     selector.value = currentTheme;
   }
+
+  if (sliderToggle) {
+    sliderToggle.checked = (currentTheme === "light");
+  }
+
+  if (label) {
+    label.textContent = currentTheme === "light" ? "☀️ Light" : "🌙 Dark";
+  }
 }
 
-// 3. თემის შეცვლა მომხმარებლის მიერ მენიუდან არჩევისას
+// 3. თემის შეცვლის ფუნქცია (როგორც სელექტორიდან, ისე სლაიდერიდან)
 function changeTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
   localStorage.setItem("crm_theme", theme);
+
+  // სინქრონიზაცია ყველა ელემენტთან გვერდზე
+  initThemeControls();
 }
 
-// 4. ლაივ საათის ფუნქცია (საიდბარში და ჰედერში)
+// 4. სლაიდერით თემის გადართვა (checked = true -> light, false -> dark)
+function toggleThemeSlider(isLight) {
+  const newTheme = isLight ? "light" : "dark";
+  changeTheme(newTheme);
+}
+
+// 5. ლაივ საათის ფუნქცია (საიდბარში და ჰედერში)
 function startLiveClock() {
   function update() {
     const now = new Date();
@@ -47,6 +65,6 @@ function startLiveClock() {
 
 // ივენთის მიბმა გვერდის ჩატვირთვაზე
 window.addEventListener("DOMContentLoaded", function () {
-  initThemeSelector();
+  initThemeControls();
   startLiveClock();
 });

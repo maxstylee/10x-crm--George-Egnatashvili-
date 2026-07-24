@@ -1,5 +1,5 @@
 (function () {
-  var currentUser = sessionStorage.getItem("crm_session");
+  const currentUser = sessionStorage.getItem("crm_session");
   // თუ მომხმარებელი არ არის შესული, გადავიყვანოთ ავტორიზაციის გვერდზე
   if (!currentUser) {
     window.location.href = "index.html";

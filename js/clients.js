@@ -1,13 +1,18 @@
 // ── 1. გლობალური ცვლადები
-var allClients = [];
-var currentEditingClientId = null;
-var pendingDeleteClientId = null;
+let allClients = [];
+let currentDisplayedClients = [];
+let currentEditingClientId = null;
+let pendingDeleteClientId = null;
+
+// პაგინაციის ცვლადები
+let currentPage = 1;
+const itemsPerPage = 10;
 
 // ── 2. მოდალის დამხმარე ფუნქციები alert/confirm-ის ჩასანაცვლებლად
 function showAlertModal(message, title) {
-  var modal = document.getElementById("appAlertModal");
-  var msgEl = document.getElementById("alertModalMessage");
-  var titleEl = document.getElementById("alertModalTitle");
+  const modal = document.getElementById("appAlertModal");
+  const msgEl = document.getElementById("alertModalMessage");
+  const titleEl = document.getElementById("alertModalTitle");
 
   if (titleEl) titleEl.textContent = title || "შეტყობინება";
   if (msgEl) msgEl.textContent = message;
@@ -15,27 +20,27 @@ function showAlertModal(message, title) {
 }
 
 function closeAlertModal() {
-  var modal = document.getElementById("appAlertModal");
+  const modal = document.getElementById("appAlertModal");
   if (modal) modal.style.display = "none";
 }
 
 function showConfirmModal(message, idToDelete) {
   pendingDeleteClientId = idToDelete;
-  var modal = document.getElementById("appConfirmModal");
-  var msgEl = document.getElementById("confirmModalMessage");
+  const modal = document.getElementById("appConfirmModal");
+  const msgEl = document.getElementById("confirmModalMessage");
 
   if (msgEl) msgEl.textContent = message;
   if (modal) modal.style.display = "flex";
 }
 
 function closeConfirmModal(isConfirmed) {
-  var modal = document.getElementById("appConfirmModal");
+  const modal = document.getElementById("appConfirmModal");
   if (modal) modal.style.display = "none";
 
   if (isConfirmed && pendingDeleteClientId !== null) {
     // წავშალოთ კლიენტი ID-ით
-    var updatedList = [];
-    for (var i = 0; i < allClients.length; i++) {
+    const updatedList = [];
+    for (let i = 0; i < allClients.length; i++) {
       if (allClients[i].id !== pendingDeleteClientId) {
         updatedList.push(allClients[i]);
       }
@@ -52,13 +57,14 @@ document.addEventListener("DOMContentLoaded", function () {
   loadClients();
   setupSearch();
   setupFilterChips();
+  setupSort();
 });
 
 // ── 4. კლიენტების ჩატვირთვა LocalStorage-დან ან API-დან
 async function loadClients() {
   showLoading();
 
-  var saved = localStorage.getItem("crm_clients");
+  const saved = localStorage.getItem("crm_clients");
   if (saved) {
     allClients = JSON.parse(saved);
     renderTable(allClients);
@@ -66,13 +72,13 @@ async function loadClients() {
   }
 
   try {
-    var response = await fetch("https://dummyjson.com/users?limit=30");
+    const response = await fetch("https://dummyjson.com/users?limit=30");
     if (!response.ok) throw new Error("Error fetching");
-    var data = await response.json();
+    const data = await response.json();
 
     allClients = [];
-    for (var i = 0; i < data.users.length; i++) {
-      var u = data.users[i];
+    for (let i = 0; i < data.users.length; i++) {
+      const u = data.users[i];
       allClients.push({
         id: u.id,
         firstName: u.firstName,
@@ -93,21 +99,37 @@ async function loadClients() {
   }
 }
 
-// ── 5. ცხრილის დახატვა
-function renderTable(clients) {
-  var zone = document.getElementById("clientsZone");
+// ── 5. ცხრილის დახატვა პაგინაციით (10 კლიენტი თითო გვერდზე)
+function renderTable(clientsList) {
+  const zone = document.getElementById("clientsZone");
   if (!zone) return;
 
-  if (clients.length === 0) {
+  currentDisplayedClients = clientsList || allClients;
+  const totalItems = currentDisplayedClients.length;
+
+  if (totalItems === 0) {
     zone.innerHTML = "<p class='no-clients-text'>კლიენტები ვერ მოიძებნა.</p>";
     return;
   }
 
-  var rows = "";
-  for (var i = 0; i < clients.length; i++) {
-    var c = clients[i];
-    var initials = (c.firstName[0] || "") + (c.lastName[0] || "");
-    var avatarColorIndex = (c.id % 7) + 1;
+  // პაგინაციის გამოთვლა
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  if (currentPage > totalPages) {
+    currentPage = totalPages;
+  }
+  if (currentPage < 1) {
+    currentPage = 1;
+  }
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const pageClients = currentDisplayedClients.slice(startIndex, endIndex);
+
+  let rows = "";
+  for (let i = 0; i < pageClients.length; i++) {
+    const c = pageClients[i];
+    const initials = (c.firstName[0] || "") + (c.lastName[0] || "");
+    const avatarColorIndex = (c.id % 7) + 1;
 
     rows += `
       <tr class="client-row" ondblclick="openClientModal(${c.id})">
@@ -118,7 +140,7 @@ function renderTable(clients) {
           </div>
         </td>
         <td>${c.email}</td>
-        <td>${c.phone}</td>
+        <td>${c.phone || "-"}</td>
         <td>${c.company}</td>
         <td class="deal-value">$${c.dealValue}</td>
         <td><span class="badge badge-${c.status}">${c.status}</span></td>
@@ -126,6 +148,16 @@ function renderTable(clients) {
           <button class="action-btn action-delete" onclick="deleteClient(event, ${c.id})" type="button" title="Delete">🗑️</button>
         </td>
       </tr>
+    `;
+  }
+
+  // პაგინაციის ღილაკების გენერაცია
+  let pageButtonsHtml = "";
+  for (let p = 1; p <= totalPages; p++) {
+    pageButtonsHtml += `
+      <button class="page-btn ${p === currentPage ? "active" : ""}" onclick="goToPage(${p})">
+        ${p}
+      </button>
     `;
   }
 
@@ -148,13 +180,31 @@ function renderTable(clients) {
         </tbody>
       </table>
     </div>
+
+    <!-- Pagination UI -->
+    <div class="pagination-container">
+      <div class="pagination-info">
+        Showing ${startIndex + 1}–${endIndex} of ${totalItems} clients (Page ${currentPage} of ${totalPages})
+      </div>
+      <div class="pagination-controls">
+        <button class="page-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""}>‹ Prev</button>
+        ${pageButtonsHtml}
+        <button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? "disabled" : ""}>Next ›</button>
+      </div>
+    </div>
   `;
 }
 
-// ── 6. მოდალის გახსნა კლიენტზე 2-ჯერ დაკლიკებისას (Double Click -> Editable Inputs)
+// გვერდის შეცვლა პაგინაციისას
+function goToPage(page) {
+  currentPage = page;
+  renderTable(currentDisplayedClients);
+}
+
+// ── 6. მოდალის გახსნა კლიენტზე 2-ჯერ დაკლიკებისას
 function openClientModal(id) {
-  var client = null;
-  for (var i = 0; i < allClients.length; i++) {
+  let client = null;
+  for (let i = 0; i < allClients.length; i++) {
     if (allClients[i].id === id) {
       client = allClients[i];
       break;
@@ -174,28 +224,28 @@ function openClientModal(id) {
   document.getElementById("editDealValue").value = client.dealValue || 0;
   document.getElementById("editStatus").value = client.status || "lead";
 
-  var modal = document.getElementById("clientInfoModal");
+  const modal = document.getElementById("clientInfoModal");
   if (modal) modal.style.display = "flex";
 }
 
 function closeClientModal() {
-  var modal = document.getElementById("clientInfoModal");
+  const modal = document.getElementById("clientInfoModal");
   if (modal) modal.style.display = "none";
 }
 
-// ── 7. მოდალიდან შეცვლილი მონაცემების შენახვა (Save Changes)
+// ── 7. მოდალიდან შეცვლილი მონაცემების შენახვა
 function saveClientEdits(event) {
   event.preventDefault();
 
   if (currentEditingClientId === null) return;
 
-  var updatedFirstName = document.getElementById("editFirstName").value.trim();
-  var updatedLastName = document.getElementById("editLastName").value.trim();
-  var updatedEmail = document.getElementById("editEmail").value.trim();
-  var updatedPhone = document.getElementById("editPhone").value.trim();
-  var updatedCompany = document.getElementById("editCompany").value.trim();
-  var updatedDealValue = Number(document.getElementById("editDealValue").value || 0);
-  var updatedStatus = document.getElementById("editStatus").value;
+  const updatedFirstName = document.getElementById("editFirstName").value.trim();
+  const updatedLastName = document.getElementById("editLastName").value.trim();
+  const updatedEmail = document.getElementById("editEmail").value.trim();
+  const updatedPhone = document.getElementById("editPhone").value.trim();
+  const updatedCompany = document.getElementById("editCompany").value.trim();
+  const updatedDealValue = Number(document.getElementById("editDealValue").value || 0);
+  const updatedStatus = document.getElementById("editStatus").value;
 
   if (!updatedFirstName || !updatedLastName || !updatedEmail) {
     showAlertModal("გთხოვთ შეავსოთ სახელი, გვარი და მეილი!");
@@ -203,7 +253,7 @@ function saveClientEdits(event) {
   }
 
   // მოვძებნოთ და განვაახლოთ კლიენტი მასივში
-  for (var i = 0; i < allClients.length; i++) {
+  for (let i = 0; i < allClients.length; i++) {
     if (allClients[i].id === currentEditingClientId) {
       allClients[i].firstName = updatedFirstName;
       allClients[i].lastName = updatedLastName;
@@ -226,15 +276,15 @@ function saveClientEdits(event) {
 
 // ── 8. ახალი კლიენტის დამატების მოდალი
 function openAddClientModal() {
-  var modal = document.getElementById("addClientModal");
+  const modal = document.getElementById("addClientModal");
   if (modal) modal.style.display = "flex";
 }
 
 function closeAddClientModal() {
-  var modal = document.getElementById("addClientModal");
+  const modal = document.getElementById("addClientModal");
   if (modal) {
     modal.style.display = "none";
-    var form = document.getElementById("addClientForm");
+    const form = document.getElementById("addClientForm");
     if (form) form.reset();
   }
 }
@@ -242,20 +292,20 @@ function closeAddClientModal() {
 function handleAddClient(event) {
   event.preventDefault();
 
-  var firstName = document.getElementById("newFirstName").value.trim();
-  var lastName = document.getElementById("newLastName").value.trim();
-  var email = document.getElementById("newEmail").value.trim();
-  var phone = document.getElementById("newPhone").value.trim();
-  var company = document.getElementById("newCompany").value.trim();
-  var dealValue = Number(document.getElementById("newDealValue").value || 0);
-  var status = document.getElementById("newStatus").value;
+  const firstName = document.getElementById("newFirstName").value.trim();
+  const lastName = document.getElementById("newLastName").value.trim();
+  const email = document.getElementById("newEmail").value.trim();
+  const phone = document.getElementById("newPhone").value.trim();
+  const company = document.getElementById("newCompany").value.trim();
+  const dealValue = Number(document.getElementById("newDealValue").value || 0);
+  const status = document.getElementById("newStatus").value;
 
   if (!firstName || !lastName || !email) {
     showAlertModal("გთხოვთ შეავსოთ სავალდებულო ველები!");
     return;
   }
 
-  var newClient = {
+  const newClient = {
     id: Date.now(),
     firstName: firstName,
     lastName: lastName,
@@ -269,6 +319,8 @@ function handleAddClient(event) {
 
   allClients.unshift(newClient);
   localStorage.setItem("crm_clients", JSON.stringify(allClients));
+  
+  currentPage = 1;
   renderTable(allClients);
 
   closeAddClientModal();
@@ -283,47 +335,50 @@ function deleteClient(event, id) {
 
 // ── 10. ძებნა (Search)
 function setupSearch() {
-  var input = document.getElementById("searchInput");
+  const input = document.getElementById("searchInput");
   if (!input) return;
 
   input.addEventListener("input", function (e) {
-    var q = e.target.value.toLowerCase().trim();
+    const q = e.target.value.toLowerCase().trim();
     if (q === "") {
+      currentPage = 1;
       renderTable(allClients);
       return;
     }
 
-    var filtered = [];
-    for (var i = 0; i < allClients.length; i++) {
-      var name = (allClients[i].firstName + " " + allClients[i].lastName).toLowerCase();
-      var email = (allClients[i].email || "").toLowerCase();
-      var company = (allClients[i].company || "").toLowerCase();
+    const filtered = [];
+    for (let i = 0; i < allClients.length; i++) {
+      const name = (allClients[i].firstName + " " + allClients[i].lastName).toLowerCase();
+      const email = (allClients[i].email || "").toLowerCase();
+      const company = (allClients[i].company || "").toLowerCase();
 
-      if (name.indexOf(q) !== -1 || email.indexOf(q) !== -1 || company.indexOf(q) !== -1) {
+      if (name.includes(q) || email.includes(q) || company.includes(q)) {
         filtered.push(allClients[i]);
       }
     }
+    currentPage = 1;
     renderTable(filtered);
   });
 }
 
 // ── 11. ფილტრაციის Chips (All, Lead, Contacted, Won, Lost)
 function setupFilterChips() {
-  var chips = document.querySelectorAll(".filter-chips .chip");
+  const chips = document.querySelectorAll(".filter-chips .chip");
   chips.forEach(function (chip) {
     chip.addEventListener("click", function () {
-      var status = this.getAttribute("name");
+      const status = this.getAttribute("name");
 
       chips.forEach(function (c) { c.classList.remove("chip-active"); });
       this.classList.add("chip-active");
 
+      currentPage = 1;
       if (status === "all") {
         renderTable(allClients);
         return;
       }
 
-      var filtered = [];
-      for (var i = 0; i < allClients.length; i++) {
+      const filtered = [];
+      for (let i = 0; i < allClients.length; i++) {
         if (allClients[i].status === status) {
           filtered.push(allClients[i]);
         }
@@ -333,27 +388,51 @@ function setupFilterChips() {
   });
 }
 
-// ── 12. Loading / Error სტეიტები
+// ── 12. სორტირება (Sort Select)
+function setupSort() {
+  const sortSelect = document.querySelector(".sort-select");
+  if (!sortSelect) return;
+
+  sortSelect.addEventListener("change", function () {
+    const val = this.value;
+    const list = [...currentDisplayedClients];
+
+    if (val === "newest") {
+      list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    } else if (val === "oldest") {
+      list.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+    } else if (val === "name_asc") {
+      list.sort((a, b) => (a.firstName + a.lastName).localeCompare(b.firstName + b.lastName));
+    } else if (val === "deal_desc") {
+      list.sort((a, b) => Number(b.dealValue || 0) - Number(a.dealValue || 0));
+    }
+
+    currentPage = 1;
+    renderTable(list);
+  });
+}
+
+// ── 13. Loading / Error სტეიტები
 function showLoading() {
-  var zone = document.getElementById("clientsZone");
+  const zone = document.getElementById("clientsZone");
   if (zone) {
     zone.innerHTML = "<div class='clients-feedback'><div class='loading-spinner'></div><p class='feedback-text'>Loading clients...</p></div>";
   }
 }
 
 function showError() {
-  var zone = document.getElementById("clientsZone");
+  const zone = document.getElementById("clientsZone");
   if (zone) {
     zone.innerHTML = "<div class='clients-feedback clients-error'><p class='feedback-text'>Could not load clients.</p><button class='btn-primary btn-auto-width' onclick='loadClients()'>Retry</button></div>";
   }
 }
 
-// ── 13. მოდალის დახურვა ფონზე კლიკისას
+// ── 14. მოდალის დახურვა ფონზე (Backdrop) დაკლიკებისას
 window.addEventListener("click", function (event) {
-  var addModal = document.getElementById("addClientModal");
-  var infoModal = document.getElementById("clientInfoModal");
-  var alertModal = document.getElementById("appAlertModal");
-  var confirmModal = document.getElementById("appConfirmModal");
+  const addModal = document.getElementById("addClientModal");
+  const infoModal = document.getElementById("clientInfoModal");
+  const alertModal = document.getElementById("appAlertModal");
+  const confirmModal = document.getElementById("appConfirmModal");
 
   if (event.target === addModal) closeAddClientModal();
   if (event.target === infoModal) closeClientModal();

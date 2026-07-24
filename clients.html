@@ -16,7 +16,7 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div>
-                <div class="logo-text">10X CRM</div>
+                <a href="dashboard.html" class="logo-text">10X CRM</a>
                 <nav class="sidebar-nav">
                     <a href="dashboard.html" class="nav-link">📊 Dashboard</a>
                     <a href="clients.html" class="nav-link active">👥 Clients</a>
@@ -28,6 +28,15 @@
                 <span id="sidebarClock" class="clock-time">00:00:00</span>
             </div>
             <div class="sidebar-bottom">
+                <div class="sidebar-theme-wrapper">
+                    <div class="theme-switch-container">
+                        <span class="theme-switch-label" id="sidebarThemeLabel">🌙 Theme</span>
+                        <label class="theme-switch">
+                            <input type="checkbox" id="sidebarThemeToggle" onchange="toggleThemeSlider(this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
                 <div>
                     <a href="index.html" class="logout-btn" onclick="logout()">🚪 Logout</a>
                 </div>

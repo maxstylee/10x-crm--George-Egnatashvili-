@@ -1,35 +1,35 @@
 // ── 1. მონაცემების წამოღება LocalStorage-დან
-var clientsData = localStorage.getItem("crm_clients");
-var allClients = clientsData ? JSON.parse(clientsData) : [];
+const clientsData = localStorage.getItem("crm_clients");
+const allClients = clientsData ? JSON.parse(clientsData) : [];
 
 // ── 2. HTML ელემენტების წამოღება (ID-ების მიხედვით)
-var totalClientsEl = document.getElementById("total-clients");
-var totalActiveClientsEl = document.getElementById("total-activeClients");
-var totalWonRevenueEl = document.getElementById("total-netRevenue");
-var totalNewThisWeekEl = document.getElementById("total-newThisWeek");
+const totalClientsEl = document.getElementById("total-clients");
+const totalActiveClientsEl = document.getElementById("total-activeClients");
+const totalWonRevenueEl = document.getElementById("total-netRevenue");
+const totalNewThisWeekEl = document.getElementById("total-newThisWeek");
 
-var countLeadEl = document.getElementById("count-lead");
-var countContactedEl = document.getElementById("count-contacted");
-var countWonEl = document.getElementById("count-won");
-var countLostEl = document.getElementById("count-lost");
+const countLeadEl = document.getElementById("count-lead");
+const countContactedEl = document.getElementById("count-contacted");
+const countWonEl = document.getElementById("count-won");
+const countLostEl = document.getElementById("count-lost");
 
-var recentClientsTable = document.getElementById("recent-clients");
+const recentClientsTable = document.getElementById("recent-clients");
 
 // ── 3. სტატისტიკის დათვლა ცვლადებში (1 უბრალო for ციკლი)
-var leadCount = 0;
-var contactedCount = 0;
-var wonCount = 0;
-var lostCount = 0;
-var activeClientsCount = 0;
-var totalWonRevenue = 0;
-var newThisWeekCount = 0;
+let leadCount = 0;
+let contactedCount = 0;
+let wonCount = 0;
+let lostCount = 0;
+let activeClientsCount = 0;
+let totalWonRevenue = 0;
+let newThisWeekCount = 0;
 
-var oneWeekAgo = new Date();
+const oneWeekAgo = new Date();
 oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-for (var i = 0; i < allClients.length; i++) {
-  var client = allClients[i];
-  var value = Number(client.dealValue || 0);
+for (let i = 0; i < allClients.length; i++) {
+  const client = allClients[i];
+  const value = Number(client.dealValue || 0);
 
   if (client.status === "lead") {
     leadCount = leadCount + 1;
@@ -72,10 +72,10 @@ if (countLostEl) countLostEl.textContent = lostCount;
 
 // ── 5. მარტივი ფუნქცია: კლიენტების დახატვა ცხრილში
 function renderClientsTable(list) {
-  var rows = "";
+  let rows = "";
 
-  for (var i = 0; i < list.length; i++) {
-    var c = list[i];
+  for (let i = 0; i < list.length; i++) {
+    const c = list[i];
     rows += "<tr>";
     rows += "  <td>" + c.firstName + " " + c.lastName + "</td>";
     rows += "  <td>" + c.company + "</td>";
@@ -90,11 +90,11 @@ function renderClientsTable(list) {
 }
 
 // თავიდან ვაჩვენოთ ბოლო 5 კლიენტი
-var firstFiveClients = allClients.slice(0, 5);
+const firstFiveClients = allClients.slice(0, 5);
 renderClientsTable(firstFiveClients);
 
 // ── 6. ფილტრაციის ფუნქცია (დოკუმენტში დივზე დაჭერისას: Lead, Contacted, Won, Lost)
-var currentFilter = "all";
+let currentFilter = "all";
 function filterClients(status) {
   // 1. თუ იმავე სტატუსს დავაჭირეთ — ფილტრი ითიშება და ჩანს პირველი 5 კლიენტი
   if (currentFilter === status) {
@@ -106,14 +106,14 @@ function filterClients(status) {
   currentFilter = status;
 
   // 2. ვაგროვებთ ამ სტატუსის მქონე კლიენტებს
-  var filteredList = [];
-  for (var i = 0; i < allClients.length; i++) {
+  const filteredList = [];
+  for (let i = 0; i < allClients.length; i++) {
     if (allClients[i].status === status) {
       filteredList.push(allClients[i]);
     }
   }
 
   // 3. ამოვიღოთ მაქსიმუმ პირველი 5 კლიენტი და დავხატოთ
-  var top5Filtered = filteredList.slice(0, 5);
+  const top5Filtered = filteredList.slice(0, 5);
   renderClientsTable(top5Filtered);
 }
