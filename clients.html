@@ -49,7 +49,10 @@
             <!-- Page Header -->
             <div class="page-header">
                 <h2>Clients</h2>
-                <button class="btn-primary btn-auto-width" onclick="openAddClientModal()">+ Add Client</button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-secondary btn-auto-width" onclick="resetClientsData()" title="Reset data from API">🔄 Reset Data</button>
+                    <button class="btn-primary btn-auto-width" onclick="openAddClientModal()">+ Add Client</button>
+                </div>
             </div>
 
             <!-- Toolbar: Search + Filter Chips + Sort -->

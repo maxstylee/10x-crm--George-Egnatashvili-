@@ -61,14 +61,20 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ── 4. კლიენტების ჩატვირთვა LocalStorage-დან ან API-დან
-async function loadClients() {
+async function loadClients(forceRefresh = false) {
   showLoading();
 
   const saved = localStorage.getItem("crm_clients");
-  if (saved) {
-    allClients = JSON.parse(saved);
-    renderTable(allClients);
-    return;
+  if (saved && !forceRefresh) {
+    try {
+      allClients = JSON.parse(saved);
+      if (allClients && allClients.length > 0) {
+        renderTable(allClients);
+        return;
+      }
+    } catch (e) {
+      localStorage.removeItem("crm_clients");
+    }
   }
 
   try {
@@ -76,27 +82,31 @@ async function loadClients() {
     if (!response.ok) throw new Error("Error fetching");
     const data = await response.json();
 
-    allClients = [];
-    for (let i = 0; i < data.users.length; i++) {
-      const u = data.users[i];
-      allClients.push({
-        id: u.id,
-        firstName: u.firstName,
-        lastName: u.lastName,
-        email: u.email,
-        phone: u.phone,
-        company: u.company.name,
-        status: "lead",
-        dealValue: Math.floor(Math.random() * 9500) + 500,
-        createdAt: new Date().toISOString()
-      });
-    }
+    allClients = data.users.map(u => ({
+      id: u.id,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      email: u.email,
+      phone: u.phone,
+      company: u.company.name,
+      status: "lead",
+      dealValue: Math.floor(Math.random() * 9500) + 500,
+      createdAt: new Date().toISOString()
+    }));
 
     localStorage.setItem("crm_clients", JSON.stringify(allClients));
     renderTable(allClients);
   } catch (err) {
     showError();
   }
+}
+
+// ── 4.1. კლიენტების მონაცემების ხელახლა ჩამოტვირთვა API-დან ──
+async function resetClientsData() {
+  localStorage.removeItem("crm_clients");
+  currentPage = 1;
+  await loadClients(true);
+  showAlertModal("კლიენტების მონაცემები წარმატებით დარესეტდა და ჩამოიტვირთა API-დან!", "წარმატება");
 }
 
 // ── 5. ცხრილის დახატვა პაგინაციით (10 კლიენტი თითო გვერდზე)
