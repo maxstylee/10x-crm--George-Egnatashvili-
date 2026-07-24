@@ -76,8 +76,8 @@ function saveProfileEdits(event) {
   const newPhone = document.getElementById("editProfilePhone") ? document.getElementById("editProfilePhone").value.trim() : "";
   const newCompany = document.getElementById("editProfileCompany").value.trim();
 
-  if (!newName) {
-    showAlertModal("გთხოვთ მიუთითოთ სახელი!");
+  if (!newName || newName.length < 3) {
+    showAlertModal("სრული სახელი უნდა შეიცავდეს მინიმუმ 3 ასოს!");
     return;
   }
 
@@ -205,6 +205,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     confirmPassInput.addEventListener("input", function () {
       validatePasswordStrength(newPassInput.value, confirmPassInput.value);
+    });
+  }
+
+  const editPhoneInput = document.getElementById("editProfilePhone");
+  if (editPhoneInput) {
+    editPhoneInput.addEventListener("input", function (e) {
+      e.target.value = e.target.value.replace(/[^0-9+\s\-()]/g, "");
     });
   }
 });

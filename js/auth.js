@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // თუ აღმოჩნდა შეცდომები — ვაჩვენებთ ყველა შეცდომას ერთდროულად
       if (errors.length > 0) {
-        const errorListHtml = errors.map(err => `• ${err}`).join("<br>");
+        const errorListHtml = errors.map((err) => `• ${err}`).join("<br>");
         showAlertModal(errorListHtml, "შეცდომა რეგისტრაციისას");
         return;
       }
@@ -99,14 +99,17 @@ document.addEventListener("DOMContentLoaded", function () {
         email: email,
         company: company,
         password: password,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       saveUser(newUser);
 
       // წარმატებული რეგისტრაციის შეტყობინება და 1.5 წამიანი დაყოვნება index.html-ზე გადასვლამდე
-      showAlertModal("რეგისტრაცია წარმატებით დასრულდა! გადადიხართ ავტორიზაციის გვერდზე...", "წარმატება");
-      
+      showAlertModal(
+        "რეგისტრაცია წარმატებით დასრულდა! გადადიხართ ავტორიზაციის გვერდზე...",
+        "წარმატება",
+      );
+
       setTimeout(function () {
         closeAlertModal();
         window.location.href = "index.html";

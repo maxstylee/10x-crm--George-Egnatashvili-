@@ -32,25 +32,25 @@ for (let i = 0; i < allClients.length; i++) {
   const value = Number(client.dealValue || 0);
 
   if (client.status === "lead") {
-    leadCount = leadCount + 1;
-    activeClientsCount = activeClientsCount + 1;
+    leadCount += 1;
+    activeClientsCount += 1;
   }
   if (client.status === "contacted") {
-    contactedCount = contactedCount + 1;
-    activeClientsCount = activeClientsCount + 1;
+    contactedCount += 1;
+    activeClientsCount += 1;
   }
   if (client.status === "won") {
-    wonCount = wonCount + 1;
-    totalWonRevenue = totalWonRevenue + value;
+    wonCount += 1;
+    totalWonRevenue += value;
   }
   if (client.status === "lost") {
-    lostCount = lostCount + 1;
-    totalWonRevenue = totalWonRevenue - value;
+    lostCount += 1;
+    totalWonRevenue -= value;
   }
 
   // 7 დღის განმავლობაში დამატებულების შემოწმება
   if (client.createdAt && new Date(client.createdAt) >= oneWeekAgo) {
-    newThisWeekCount = newThisWeekCount + 1;
+    newThisWeekCount += 1;
   }
 }
 
@@ -62,39 +62,34 @@ if (newThisWeekCount === 0 && allClients.length > 0) {
 // ── 4. დათვლილი რიცხვების ჩასმა HTML-ში
 if (totalClientsEl) totalClientsEl.textContent = allClients.length;
 if (totalActiveClientsEl) totalActiveClientsEl.textContent = activeClientsCount;
-if (totalWonRevenueEl) totalWonRevenueEl.textContent = "$" + totalWonRevenue;
-if (totalNewThisWeekEl) totalNewThisWeekEl.textContent = "+" + newThisWeekCount;
+if (totalWonRevenueEl) totalWonRevenueEl.textContent = `$${totalWonRevenue}`;
+if (totalNewThisWeekEl) totalNewThisWeekEl.textContent = `+${newThisWeekCount}`;
 
 if (countLeadEl) countLeadEl.textContent = leadCount;
 if (countContactedEl) countContactedEl.textContent = contactedCount;
 if (countWonEl) countWonEl.textContent = wonCount;
 if (countLostEl) countLostEl.textContent = lostCount;
 
-// ── 5. მარტივი ფუნქცია: კლიენტების დახატვა ცხრილში
+// ── 5. მარტივი ფუნქცია: კლიენტების დახატვა ცხრილში (Template Literals & DRY)
 function renderClientsTable(list) {
-  let rows = "";
+  if (!recentClientsTable) return;
 
-  for (let i = 0; i < list.length; i++) {
-    const c = list[i];
-    rows += "<tr>";
-    rows += "  <td>" + c.firstName + " " + c.lastName + "</td>";
-    rows += "  <td>" + c.company + "</td>";
-    rows += "  <td>$" + c.dealValue + "</td>";
-    rows += "  <td><span class=\"badge badge-" + c.status + "\">" + c.status + "</span></td>";
-    rows += "</tr>";
-  }
-
-  if (recentClientsTable) {
-    recentClientsTable.innerHTML = rows;
-  }
+  recentClientsTable.innerHTML = list.map(c => `
+    <tr>
+      <td>${c.firstName} ${c.lastName}</td>
+      <td>${c.company}</td>
+      <td>$${c.dealValue}</td>
+      <td><span class="badge badge-${c.status}">${c.status}</span></td>
+    </tr>
+  `).join("");
 }
 
-// თავიდან ვაჩვენოთ ბოლო 5 კლიენტი
-const firstFiveClients = allClients.slice(0, 5);
-renderClientsTable(firstFiveClients);
+// თავიდან ვაჩვენოთ პირველი 5 კლიენტი
+renderClientsTable(allClients.slice(0, 5));
 
 // ── 6. ფილტრაციის ფუნქცია (დოკუმენტში დივზე დაჭერისას: Lead, Contacted, Won, Lost)
 let currentFilter = "all";
+
 function filterClients(status) {
   // 1. თუ იმავე სტატუსს დავაჭირეთ — ფილტრი ითიშება და ჩანს პირველი 5 კლიენტი
   if (currentFilter === status) {
@@ -105,15 +100,7 @@ function filterClients(status) {
 
   currentFilter = status;
 
-  // 2. ვაგროვებთ ამ სტატუსის მქონე კლიენტებს
-  const filteredList = [];
-  for (let i = 0; i < allClients.length; i++) {
-    if (allClients[i].status === status) {
-      filteredList.push(allClients[i]);
-    }
-  }
-
-  // 3. ამოვიღოთ მაქსიმუმ პირველი 5 კლიენტი და დავხატოთ
-  const top5Filtered = filteredList.slice(0, 5);
-  renderClientsTable(top5Filtered);
+  // 2. ფილტრაცია და პირველი 5 კლიენტის დახატვა
+  const filteredList = allClients.filter(c => c.status === status);
+  renderClientsTable(filteredList.slice(0, 5));
 }
