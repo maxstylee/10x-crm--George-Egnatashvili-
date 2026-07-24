@@ -46,7 +46,7 @@ function closeConfirmModal(isConfirmed) {
       }
     }
     allClients = updatedList;
-    localStorage.setItem("crm_clients", JSON.stringify(allClients));
+    saveUserClients(allClients);
     renderTable(allClients);
   }
   pendingDeleteClientId = null;
@@ -64,17 +64,11 @@ document.addEventListener("DOMContentLoaded", function () {
 async function loadClients(forceRefresh = false) {
   showLoading();
 
-  const saved = localStorage.getItem("crm_clients");
-  if (saved && !forceRefresh) {
-    try {
-      allClients = JSON.parse(saved);
-      if (allClients && allClients.length > 0) {
-        renderTable(allClients);
-        return;
-      }
-    } catch (e) {
-      localStorage.removeItem("crm_clients");
-    }
+  const savedClients = getUserClients();
+  if (savedClients && savedClients.length > 0 && !forceRefresh) {
+    allClients = savedClients;
+    renderTable(allClients);
+    return;
   }
 
   try {
@@ -94,7 +88,7 @@ async function loadClients(forceRefresh = false) {
       createdAt: new Date().toISOString()
     }));
 
-    localStorage.setItem("crm_clients", JSON.stringify(allClients));
+    saveUserClients(allClients);
     renderTable(allClients);
   } catch (err) {
     showError();
@@ -103,7 +97,7 @@ async function loadClients(forceRefresh = false) {
 
 // ── 4.1. კლიენტების მონაცემების ხელახლა ჩამოტვირთვა API-დან ──
 async function resetClientsData() {
-  localStorage.removeItem("crm_clients");
+  removeUserClients();
   currentPage = 1;
   await loadClients(true);
   showAlertModal("კლიენტების მონაცემები წარმატებით დარესეტდა და ჩამოიტვირთა API-დან!", "წარმატება");
@@ -277,7 +271,7 @@ function saveClientEdits(event) {
   }
 
   // შევინახოთ localStorage-ში და ხელახლა დავხატოთ
-  localStorage.setItem("crm_clients", JSON.stringify(allClients));
+  saveUserClients(allClients);
   renderTable(allClients);
 
   closeClientModal();
@@ -328,7 +322,7 @@ function handleAddClient(event) {
   };
 
   allClients.unshift(newClient);
-  localStorage.setItem("crm_clients", JSON.stringify(allClients));
+  saveUserClients(allClients);
   
   currentPage = 1;
   renderTable(allClients);

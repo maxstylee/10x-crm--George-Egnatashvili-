@@ -68,3 +68,32 @@ window.addEventListener("DOMContentLoaded", function () {
   initThemeControls();
   startLiveClock();
 });
+
+// ── 6. იუზერზე მორგებული LocalStorage Key-ს და ფუნქციების მართვა ──
+function getClientsStorageKey() {
+  const currentEmail = sessionStorage.getItem("crm_session");
+  return currentEmail ? `crm_clients_${currentEmail}` : "crm_clients";
+}
+
+function getUserClients() {
+  const key = getClientsStorageKey();
+  const saved = localStorage.getItem(key);
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+}
+
+function saveUserClients(clients) {
+  const key = getClientsStorageKey();
+  localStorage.setItem(key, JSON.stringify(clients));
+}
+
+function removeUserClients() {
+  const key = getClientsStorageKey();
+  localStorage.removeItem(key);
+}
