@@ -204,6 +204,31 @@ body {
   text-decoration: underline;
 }
 
+.form-control.input-error {
+  border-color: var(--status-lost) !important;
+  background-color: rgba(252, 66, 74, 0.06);
+}
+
+.field-error-msg {
+  color: var(--status-lost);
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 5px;
+  display: none;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.3;
+}
+
+.field-error-msg.visible {
+  display: flex;
+}
+
+.field-error-msg::before {
+  content: "⚠️";
+  font-size: 11px;
+}
+
 .error-text {
   color: var(--status-lost);
   font-size: 12px;

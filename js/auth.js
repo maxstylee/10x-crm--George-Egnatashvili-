@@ -33,15 +33,93 @@ function saveUser(newUser) {
   localStorage.setItem("crm_users", JSON.stringify(users));
 }
 
-// ── 3. გვერდის ჩატვირთვა და ფორმების მართვა
+// ── 3. DRY ინფუთების შეცდომების მართვის ფუნქციები ──
+function setFieldError(inputId, message) {
+  const inputEl = typeof inputId === "string" ? document.getElementById(inputId) : inputId;
+  if (!inputEl) return;
+
+  inputEl.classList.add("input-error");
+
+  const formGroup = inputEl.closest(".form-group");
+  if (!formGroup) return;
+
+  let errorEl = formGroup.querySelector(".field-error-msg");
+  if (!errorEl) {
+    errorEl = document.createElement("small");
+    errorEl.className = "field-error-msg";
+    formGroup.appendChild(errorEl);
+  }
+
+  errorEl.textContent = message;
+  errorEl.classList.add("visible");
+  errorEl.style.display = "flex";
+}
+
+function clearFormErrors(formEl) {
+  if (!formEl) return;
+
+  const errorInputs = formEl.querySelectorAll(".input-error");
+  errorInputs.forEach(input => input.classList.remove("input-error"));
+
+  const errorMsgs = formEl.querySelectorAll(".field-error-msg");
+  errorMsgs.forEach(msg => {
+    msg.classList.remove("visible");
+    msg.style.display = "none";
+    msg.textContent = "";
+  });
+}
+
+function setupInputClearOnError(formEl) {
+  if (!formEl) return;
+  const inputs = formEl.querySelectorAll(".form-control");
+  inputs.forEach(input => {
+    input.addEventListener("input", function () {
+      if (input.classList.contains("input-error")) {
+        input.classList.remove("input-error");
+        const formGroup = input.closest(".form-group");
+        if (formGroup) {
+          const errorEl = formGroup.querySelector(".field-error-msg");
+          if (errorEl) {
+            errorEl.classList.remove("visible");
+            errorEl.style.display = "none";
+            errorEl.textContent = "";
+          }
+        }
+      }
+    });
+  });
+}
+
+// ── 4. პაროლის სირთულის შემოწმება (მინიმუმ 8 სიმბოლო, 1 დიდი ასო, 1 ციფრი) ──
+function validatePasswordRequirements(password) {
+  if (!password || password.length < 8) {
+    return "პაროლი უნდა იყოს სულ მცირე 8 სიმბოლო.";
+  }
+  if (!/[A-Z]/.test(password)) {
+    return "პაროლი უნდა შეიცავდეს სულ მცირე 1 დიდ ასოს (A-Z).";
+  }
+  if (!/[0-9]/.test(password)) {
+    return "პაროლი უნდა შეიცავდეს სულ მცირე 1 ციფრს (0-9).";
+  }
+  return null;
+}
+
+// ── 5. გვერდის ჩატვირთვა და ფორმების მართვა
 document.addEventListener("DOMContentLoaded", function () {
   const signupForm = document.getElementById("signupForm");
   const signinForm = document.getElementById("form-signin");
 
-  // Sign Up ფორმა — ყველა ველის ერთდროული ვალიდაცია
+  if (signupForm) setupInputClearOnError(signupForm);
+  if (signinForm) setupInputClearOnError(signinForm);
+
+
+
+  // Sign Up ფორმა — ინლაინ შეცდომების გამოჩენა ყოველი ინფუთის დაბლა
   if (signupForm) {
     signupForm.addEventListener("submit", function (event) {
       event.preventDefault();
+
+      clearFormErrors(signupForm);
 
       const name = document.getElementById("fullName").value.trim();
       const email = document.getElementById("email").value.trim();
@@ -49,49 +127,47 @@ document.addEventListener("DOMContentLoaded", function () {
       const password = document.getElementById("password").value;
       const confirmPassword = document.getElementById("confirmPassword").value;
 
-      // შეცდომების შეგროვება მასივში (ყველა ვალიდაცია ერთდროულად)
-      const errors = [];
+      let hasError = false;
 
       // 1. სრული სახელი — არანაკლებ 3 ასო
       if (!name || name.length < 3) {
-        errors.push("სრული სახელი უნდა შეიცავდეს არანაკლებ 3 ასოს.");
+        setFieldError("fullName", "სრული სახელი უნდა შეიცავდეს არანაკლებ 3 ასოს.");
+        hasError = true;
       }
 
       // 2. ელ-ფოსტის შემოწმება
       if (!email || !email.includes("@")) {
-        errors.push("გთხოვთ მიუთითოთ ვალიდური ელ-ფოსტის მისამართი.");
+        setFieldError("email", "გთხოვთ მიუთითოთ ვალიდური ელ-ფოსტის მისამართი.");
+        hasError = true;
       } else {
-        // უკვე არსებული ელ-ფოსტის შემოწმება
         const users = getUsers();
-        for (let i = 0; i < users.length; i++) {
-          if (users[i].email === email) {
-            errors.push("ამ ელ-ფოსტით ანგარიში უკვე არსებობს.");
-            break;
-          }
+        const emailExists = users.some(u => u.email === email);
+        if (emailExists) {
+          setFieldError("email", "ამ ელ-ფოსტით ანგარიში უკვე არსებობს.");
+          hasError = true;
         }
       }
 
       // 3. კომპანიის სახელი
       if (!company) {
-        errors.push("გთხოვთ მიუთითოთ კომპანიის სახელი.");
+        setFieldError("company", "გთხოვთ მიუთითოთ კომპანიის სახელი.");
+        hasError = true;
       }
 
-      // 4. პაროლის სიგრძე — მინიმუმ 8 სიმბოლო
-      if (!password || password.length < 8) {
-        errors.push("პაროლი უნდა იყოს სულ მცირე 8 სიმბოლო.");
+      // 4. პაროლის სიგრძე და სირთულე (8+ სიმბოლო, 1 დიდი ასო, 1 ციფრი)
+      const passError = validatePasswordRequirements(password);
+      if (passError) {
+        setFieldError("password", passError);
+        hasError = true;
       }
 
       // 5. პაროლების თანხვედრა
       if (password !== confirmPassword) {
-        errors.push("პაროლები ერთმანეთს არ ემთხვევა.");
+        setFieldError("confirmPassword", "პაროლები ერთმანეთს არ ემთხვევა.");
+        hasError = true;
       }
 
-      // თუ აღმოჩნდა შეცდომები — ვაჩვენებთ ყველა შეცდომას ერთდროულად
-      if (errors.length > 0) {
-        const errorListHtml = errors.map((err) => `• ${err}`).join("<br>");
-        showAlertModal(errorListHtml, "შეცდომა რეგისტრაციისას");
-        return;
-      }
+      if (hasError) return;
 
       // თუ შეცდომა არ არის — ვინახავთ მომხმარებელს
       const newUser = {
@@ -104,10 +180,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
       saveUser(newUser);
 
-      // წარმატებული რეგისტრაციის შეტყობინება და 1.5 წამიანი დაყოვნება index.html-ზე გადასვლამდე
       showAlertModal(
         "რეგისტრაცია წარმატებით დასრულდა! გადადიხართ ავტორიზაციის გვერდზე...",
-        "წარმატება",
+        "წარმატება"
       );
 
       setTimeout(function () {
@@ -117,28 +192,41 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Sign In ფორმა
+  // Sign In ფორმა — არასწორი მონაცემებისას მოდალის გამოჩენა
   if (signinForm) {
     signinForm.addEventListener("submit", function (event) {
       event.preventDefault();
 
-      const email = document.getElementById("signinEmail").value.trim();
-      const password = document.getElementById("signinPassword").value;
-      const users = getUsers();
+      clearFormErrors(signinForm);
 
-      let foundUser = null;
-      for (let i = 0; i < users.length; i++) {
-        if (users[i].email === email && users[i].password === password) {
-          foundUser = users[i];
-          break;
-        }
+      const emailInput = document.getElementById("signinEmail");
+      const passwordInput = document.getElementById("signinPassword");
+
+      const email = emailInput ? emailInput.value.trim() : "";
+      const password = passwordInput ? passwordInput.value : "";
+
+      if (!email || !email.includes("@")) {
+        setFieldError("signinEmail", "გთხოვთ მიუთითოთ ვალიდური ელ-ფოსტის მისამართი.");
+        showAlertModal("გთხოვთ მიუთითოთ ვალიდური ელ-ფოსტის მისამართი!", "ავტორიზაციის შეცდომა");
+        return;
       }
+
+      if (!password) {
+        setFieldError("signinPassword", "გთხოვთ მიუთითოთ პაროლი.");
+        showAlertModal("გთხოვთ მიუთითოთ პაროლი!", "ავტორიზაციის შეცდომა");
+        return;
+      }
+
+      const users = getUsers();
+      const foundUser = users.find(u => u.email === email && u.password === password);
 
       if (foundUser) {
         sessionStorage.setItem("crm_session", email);
         window.location.href = "dashboard.html";
       } else {
-        showAlertModal("არასწორი ელ-ფოსტა ან პაროლი!");
+        setFieldError("signinEmail", "არასწორი ელ-ფოსტა ან პაროლი!");
+        setFieldError("signinPassword", "არასწორი ელ-ფოსტა ან პაროლი!");
+        showAlertModal("არასწორი ელ-ფოსტა ან პაროლი!", "ავტორიზაციის შეცდომა");
       }
     });
   }
